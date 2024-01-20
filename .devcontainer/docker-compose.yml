@@ -1,0 +1,16 @@
+# DevContainer構成用docker-compose
+
+version: '3.6'
+
+services:
+    devcontainer:
+        build:
+            context: ../
+            dockerfile: .devcontainer/Dockerfile
+        tty: true
+        volumes:
+            - type: bind 
+              source: ../
+              target: /workspace/
+        environment:
+            LANG: ja_JP.UTF-8
