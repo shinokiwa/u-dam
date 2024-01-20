@@ -1,0 +1,31 @@
+{
+    "name": "u-dam",
+
+    "overrideCommand": false,
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "devcontainer",
+
+    "workspaceFolder": "/workspace/",
+
+    "customizations": {
+      "vscode": {
+        "settings": {
+	        "python.defaultInterpreterPath": "/usr/local/bin/python3",
+	        "python.testing.pytestPath": "/usr/local/bin/pytest",
+            "python.testing.cwd": "/workspace/",
+            "python.testing.pytestEnabled": true,
+            "python.testing.pytestArgs": [
+                "-s",
+                "-v"
+            ],
+            "python.testing.unittestEnabled": false
+        },
+        "extensions": [
+            "ms-python.python",
+            "GitHub.copilot",
+            "ms-azuretools.vscode-docker",
+            "EditorConfig.EditorConfig"
+        ] 
+      }
+    }
+  }
