@@ -9,9 +9,11 @@ from sqlite3 import Connection
 def create_table (conn:Connection) -> None:
     """
     テーブルを作成
+
+    - 通常は IF NOT EXISTS は不要だが、非U-DAM管理データベースに追加する場合も考慮している。
     """
     conn.executescript((
-        "CREATE TABLE udam_status ("
+        "CREATE TABLE IF NOT EXISTS udam_status ("
             "key TEXT PRIMARY KEY,"     # ステータスキー
             "value TEXT"                # ステータス値
         ");"
@@ -26,6 +28,19 @@ class UdamStatusKeys(enum.Enum):
     VERSION = 'version'
     UDAM_VERSION = 'udam_version'
 
+def is_exist_table_udam_status (conn:Connection) -> bool:
+    """
+    U-DAM管理テーブルが存在するか確認する。
+
+    Args:
+        conn (Connection): DBコネクション
+
+    Returns:
+        bool: 存在する場合はTrue
+    """
+    sql = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='udam_status'"
+    row = conn.execute(sql).fetchone()
+    return row[0] == 1
 
 def set_udam_status (conn:Connection, key:Union[str, UdamStatusKeys], value:str) -> None:
     """
@@ -99,4 +114,20 @@ def get_udam_database_version (conn:Connection) -> int:
     """
     バージョンを取得
     """
-    return int(get_udam_status(conn, UdamStatusKeys.VERSION))
+    value = get_udam_status(conn, UdamStatusKeys.VERSION)
+    return int(value) if value is not None else None
+
+
+def set_udam_database_udam_version (conn:Connection, version:int) -> None:
+    """
+    UDAM管理テーブルのバージョンを設定
+    """
+    set_udam_status(conn, UdamStatusKeys.UDAM_VERSION, str(version))
+    return
+
+def get_udam_database_udam_version (conn:Connection) -> int:
+    """
+    UDAM管理テーブルのバージョンを取得
+    """
+    value = get_udam_status(conn, UdamStatusKeys.UDAM_VERSION)
+    return int(value) if value is not None else None

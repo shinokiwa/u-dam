@@ -27,6 +27,21 @@ def test_create_table(conn:sqlite3.Connection):
     result = conn.execute("SELECT COUNT(*) FROM udam_status").fetchone()
     assert result[0] == 0
 
+
+def test_is_exist_table_udam_status(conn:sqlite3.Connection):
+    """
+    is_exist_table_udam_status
+
+    it:
+        - テーブルが存在しない場合はFalseを返す。
+        - テーブルが存在する場合はTrueを返す。
+    """
+    assert is_exist_table_udam_status(conn) == True
+
+    conn.execute("DROP TABLE udam_status")
+    assert is_exist_table_udam_status(conn) == False
+
+
 def test_set_udam_status(conn:sqlite3.Connection):
     """
     set_udam_status

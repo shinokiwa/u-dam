@@ -2,19 +2,14 @@
 """
 import sqlite3
 import datetime
-from typing import Union
-from os import PathLike
-from pathlib import Path
+from .types import StrOrBytesOrPath
 
-def connect_database(file_path:Union[str, bytes, PathLike, Path]) -> sqlite3.Connection:
+def connect_database(file_path:StrOrBytesOrPath) -> sqlite3.Connection:
     """データベースに接続する
 
     Args:
         file_path (Union[str, bytes, PathLike, Path]): データベースファイルパス
     """
-    if isinstance(file_path, (PathLike, Path)):
-        file_path = str(file_path)
-
     conn = sqlite3.connect(file_path)
     conn.row_factory = sqlite3.Row
 

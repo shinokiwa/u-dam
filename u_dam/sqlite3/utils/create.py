@@ -1,24 +1,26 @@
 """
 DBの初期化を行うモジュール
 """
-from os import PathLike
-from typing import Callable, Union
-from pathlib import Path
+from typing import Callable
 import sqlite3
 from importlib import import_module
 
 from logging import getLogger; logger = getLogger(__name__)
 
+from .types import StrOrBytesOrPath
 from .connection import connect_database
-from .params import UdamParams
+from .params import (
+    UdamParams,
+    get_udam_params
+)
 from ..database.tables.status import (
-    UdamStatusKeys,
-    set_udam_status,
+    set_udam_database_version,
+    set_udam_database_udam_version,
 )
 
 def create_database (
-        connection_method:Callable[[Union[str, bytes, PathLike, Path]], sqlite3.Connection],
-        database_path: Union[str, bytes, PathLike, Path],
+        connection_method:Callable[[StrOrBytesOrPath], sqlite3.Connection],
+        database_path: StrOrBytesOrPath,
         package_name:str
     ) -> sqlite3.Connection:
     """
@@ -35,41 +37,40 @@ def create_database (
         database_path: DBのパス
         package_name: テーブルを作成するパッケージ名
     """
+    logger.debug(f"create_database: {database_path}")
     conn = connection_method(database_path)
-    params =init_database(conn, package_name, UdamStatusKeys.VERSION)
+    params =init_database(conn, package_name)
     conn.commit()
 
     # U-DAM自身のテーブルを作成
-    udam_conn =connect_database(database_path)
-    udam_params = init_database(udam_conn, "u_dam.sqlite3.database", UdamStatusKeys.UDAM_VERSION)
+    create_udam_database(database_path).close()
 
     # バージョンを設定
-    set_udam_status(udam_conn, UdamStatusKeys.UDAM_VERSION, udam_params.version)
-    set_udam_status(udam_conn, UdamStatusKeys.VERSION, params.version)
-    udam_conn.commit()
-    udam_conn.close()
+    set_udam_database_version(conn, params.version)
+    conn.commit()
 
     return conn
 
+def create_udam_database (database_path: StrOrBytesOrPath) -> sqlite3.Connection:
+    """
+    U-DAM自身のDBを作成する。
+    """
+    logger.debug(f"create_udam_database: {database_path}")
+    conn = connect_database(database_path)
+    udam_params = init_database(conn, "u_dam.sqlite3.database")
+    # バージョンを設定
+    set_udam_database_udam_version(conn, udam_params.version)
+    conn.commit()
+    return conn
 
 
-def init_database (conn:sqlite3.Connection, package_name:str, version_key:UdamStatusKeys) -> UdamParams:
+def init_database (conn:sqlite3.Connection, package_name:str) -> UdamParams:
     """
     DBの初期化の実体処理。
 
     - U-DAM自身のテーブルも作成するので、実体を分離している。
     """
-    try:
-        package = import_module(package_name)
-    except ModuleNotFoundError as e:
-        raise Exception(f"No package named '{package_name}'") from e
-
-    if not hasattr(package, 'UDAM_PARAMS'):
-        raise Exception(f"UDAM_PARAMS is not defined in {package_name}")
-    
-    params:UdamParams = package.UDAM_PARAMS
-    if not isinstance(params, UdamParams):
-        raise Exception(f"UDAM_PARAMS is not UdamParams in {package_name}")
+    params = get_udam_params(package_name)
 
     if params.auto_initialize_package is None:
         tables = package_name
