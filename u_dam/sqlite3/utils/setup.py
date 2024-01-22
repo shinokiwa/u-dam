@@ -95,7 +95,9 @@ def is_need_create (database_path: StrOrBytesOrPath) -> Tuple[bool, bool]:
         Tuple[bool, bool]: (DBの作成が必要かどうか, 管理テーブルの作成が必要かどうか)
     """
     # 指定されたパスがインメモリかどうかを判定
-    is_memory = database_path == ":memory:" or "mode=memory" in database_path
+    # str型かbytes型の場合しかありえないが、一応全型に対応するため変換
+    str_path = str(database_path)
+    is_memory = str_path == ":memory:" or "mode=memory" in str_path
 
     if is_memory:
         # インメモリの場合は作成を行う

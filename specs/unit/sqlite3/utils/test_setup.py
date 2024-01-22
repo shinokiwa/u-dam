@@ -5,6 +5,7 @@ import pytest
 
 import sqlite3
 import tempfile
+from pathlib import Path
 
 from u_dam.sqlite3 import (
     setup_database,
@@ -83,10 +84,7 @@ def test_setup_database ():
 
     # セットアップ済みの場合
     # 特に何もしないので、エラーがないことを確認する
-    conn = setup_database(sqlite3.connect, db_path, 'samples.basic')
+    # 引数がPathの時に不具合があったので、ついでにここで確認
+    conn = setup_database(sqlite3.connect, Path(db_path), 'samples.basic')
     assert get_udam_database_version(conn) == 4
     conn.close()
-
-
-
-
