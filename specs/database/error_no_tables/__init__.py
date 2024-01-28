@@ -8,7 +8,7 @@ from u_dam.sqlite3 import UdamParams
 UDAM_PARAMS = UdamParams(
     # 現在のデータベースバージョン
     # INT型のみ。
-    version=2,
+    initial_version=2,
 
     # 自動的にテーブルを作成する配下パッケージ名
     auto_initialize_package=None,

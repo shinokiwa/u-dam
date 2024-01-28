@@ -52,8 +52,8 @@ def test_do_migration (mocker:MockerFixture):
         - やや結合テスト気味になるが、load_migration_scriptsとrun_migration_scriptsのテストも兼ねる。
     """
     conn = sqlite3.connect("file:memdb1?mode=memory&cache=shared")
-    conn = create_database(sqlite3.connect, "file:memdb1?mode=memory&cache=shared", "samples.basic")
-    do_migration(conn, 'samples.basic', UdamStatusKeys.VERSION, 1)
+    conn = create_database(sqlite3.connect, "file:memdb1?mode=memory&cache=shared", "samples.p001_basic")
+    do_migration(conn, 'samples.p001_basic', UdamStatusKeys.VERSION, 1)
 
 
     # バージョンが4になっていることを確認
@@ -70,5 +70,16 @@ def test_do_migration (mocker:MockerFixture):
     assert r == []
 
     # バージョン4は故意に何もしないので確認不要
+
+    # もう一度実行すると、max_versionを超えるので何もしない
+    do_migration(conn, 'samples.p001_basic', UdamStatusKeys.VERSION, 4)
+    r = conn.execute('SELECT value FROM udam_status WHERE key="version" ').fetchone()
+    assert r[0] == "4"
+
+    # max_versionがNoneの場合は、バージョン5が適用される
+    mocker.patch('samples.p001_basic.UDAM_PARAMS.max_version', None)
+    do_migration(conn, 'samples.p001_basic', UdamStatusKeys.VERSION, 4)
+    r = conn.execute('SELECT value FROM udam_status WHERE key="version" ').fetchone()
+    assert r[0] == "5"
 
     conn.close()

@@ -56,7 +56,7 @@ def setup_database (
         init_conn = create_udam_database(database_path)
         # バージョンを設定
         params = get_udam_params(package_name)
-        set_udam_database_version(init_conn, params.version)
+        set_udam_database_version(init_conn, params.initial_version)
         init_conn.commit()
     
     # U-DAM自身のマイグレーション

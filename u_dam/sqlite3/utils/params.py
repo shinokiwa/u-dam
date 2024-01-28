@@ -7,10 +7,28 @@ from importlib import import_module
 
 @dataclass
 class UdamParams:
-    version:int = 1
-    auto_initialize_package:str = None
+    initial_version:int
+    """
+    auto_initialize_packageで指定されたパッケージのバージョン番号。
+    """
+
+    auto_initialize_tables:List[str]
+    """
+    自動的にテーブルを作成するパッケージのリスト。
+    """
+    
+    max_version:int = None
+    """
+    自動的にバージョンアップする場合の最大バージョン番号。
+    Noneの場合は可能な限りバージョンアップする。
+    """
+
+    auto_initialize_package:str = "tables"
+    """
+    自動的にテーブルを作成するパッケージ名。
+    """
+
     create_table:str = "create_table"
-    auto_initialize_tables:List[str] = None
 
 def get_udam_params (package_name:str) -> UdamParams:
     """

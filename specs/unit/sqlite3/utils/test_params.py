@@ -13,9 +13,9 @@ def test_get_udam_params ():
         - UDAM_PARAMSを取得する。
         - UDAM_PARAMSがUdamParamsでない場合は、例外を発生する。
     """
-    params = get_udam_params('samples.basic')
+    params = get_udam_params('samples.p001_basic')
     assert isinstance(params, UdamParams)
-    assert params.version == 1
+    assert params.initial_version == 1
 
 def test_get_udam_params_error ():
     """

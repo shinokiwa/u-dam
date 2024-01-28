@@ -21,5 +21,7 @@ from .utils.setup import (
 __all__ = [
     "UdamParams",
     "connect_database",
-    "create_database"
+    "create_database",
+    "get_udam_database_version",
+    "setup_database",
 ]

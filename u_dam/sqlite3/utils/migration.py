@@ -10,6 +10,10 @@ from importlib import import_module
 import sqlite3
 from pathlib import Path
 
+from .params import (
+    UdamParams,
+    get_udam_params
+)
 from ..database.tables.status import (
     set_udam_status,
     UdamStatusKeys
@@ -20,6 +24,13 @@ def do_migration (conn:sqlite3.Connection, package_name:str, version_key:UdamSta
     マイグレーションを実行する
     """
 
+    # 現在のバージョンがmax_versionを超えている場合は、マイグレーションを行わない
+    params = get_udam_params(package_name)
+    if params.max_version is not None:
+        if start_version >= params.max_version:
+            logger.info(f"current version is {start_version}. migration is not needed.")
+            return
+
     # パッケージ名からディレクトリを取得
     directory = Path(import_module(package_name).__file__).parent / 'versions'
 
@@ -27,7 +38,7 @@ def do_migration (conn:sqlite3.Connection, package_name:str, version_key:UdamSta
     migration_scripts = load_migration_scripts(directory)
 
     # マイグレーションスクリプトを実行
-    run_migration_scripts(conn, migration_scripts, version_key, start_version)
+    run_migration_scripts(conn, migration_scripts, version_key, start_version, params)
 
 # 正規表現だけテストするために、グローバル変数にしている
 regexp = re.compile(r'^v(\d+)(_.*)?\.py$')
@@ -53,7 +64,7 @@ def load_migration_scripts(directory:Path):
             })
     return migration_scripts
 
-def run_migration_scripts (conn:sqlite3.Connection, migration_scripts:Dict, version_key:UdamStatusKeys, start_version:int):
+def run_migration_scripts (conn:sqlite3.Connection, migration_scripts:Dict, version_key:UdamStatusKeys, start_version:int, params:UdamParams):
     """
     マイグレーションスクリプトを実行する
     """
@@ -64,6 +75,11 @@ def run_migration_scripts (conn:sqlite3.Connection, migration_scripts:Dict, vers
             # バージョンが開始バージョンよりも小さい場合はスキップ
             logger.debug(f"already migrated: {script_path}")
             continue
+        
+        if params.max_version is not None and version > params.max_version:
+            # バージョンが最大バージョンよりも大きい場合は終了
+            logger.debug(f"max version exceeded: {script_path}")
+            break
 
         # スクリプトを動的にインポートして実行
         spec = importlib.util.spec_from_file_location(f"migration_v{version}", script_path)

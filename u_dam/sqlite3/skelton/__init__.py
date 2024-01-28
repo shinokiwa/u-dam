@@ -21,6 +21,6 @@ UDAM_PARAMS = UdamParams(
     # tablesパッケージのうち、自動的にテーブルを作成するモジュールのリスト
     # 記載順に作成される。
     auto_initialize_tables=[ 
-        "status",
+        "users",
     ]
 )

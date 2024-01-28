@@ -46,7 +46,7 @@ def create_database (
     create_udam_database(database_path).close()
 
     # バージョンを設定
-    set_udam_database_version(conn, params.version)
+    set_udam_database_version(conn, params.initial_version)
     conn.commit()
 
     return conn
@@ -59,7 +59,7 @@ def create_udam_database (database_path: StrOrBytesOrPath) -> sqlite3.Connection
     conn = connect_database(database_path)
     udam_params = init_database(conn, "u_dam.sqlite3.database")
     # バージョンを設定
-    set_udam_database_udam_version(conn, udam_params.version)
+    set_udam_database_udam_version(conn, udam_params.initial_version)
     conn.commit()
     return conn
 

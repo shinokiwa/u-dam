@@ -14,7 +14,7 @@ def test_create_database():
         - DBの初期化を行う。
         - package_name で指定されたパッケージにあるテーブルを全て作成する。
     """
-    conn = create_database(connect_database, "file:memdb1?mode=memory&cache=shared", "samples.basic")
+    conn = create_database(connect_database, "file:memdb1?mode=memory&cache=shared", "samples.p001_basic")
 
     # アサーションの都合テーブルは名前順に並べ替える
     tables = conn.execute('SELECT name FROM sqlite_master WHERE type="table" ORDER BY NAME ASC').fetchall()
